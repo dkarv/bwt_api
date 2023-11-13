@@ -25,7 +25,7 @@ class CurrentResponse:
     regeneration_last_1: str  # date time
     regeneration_last_2: str  # date time
     service_customer: str
-    service_technican: str
+    service_technician: str
     out_of_service: int
     regeneration_count_1: int
     regeneration_count_2: int

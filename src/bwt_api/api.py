@@ -2,7 +2,7 @@ import aiohttp
 import asyncio
 import base64
 from bwt_api.error import BwtError
-from bwt_api.exception import WrongCodeException
+from bwt_api.exception import ApiException, ConnectException, WrongCodeException
 
 from bwt_api.data import CurrentResponse, DailyResponse, MonthlyResponse, YearlyResponse
 from bwt_api.data import Hardness
@@ -18,21 +18,24 @@ class BwtApi:
 
     async def get_data(self, endpoint):
         async with aiohttp.ClientSession(headers=self.headers) as session:
-            async with session.get(
-                f"http://{self.host}:8080/api/{endpoint}"
-            ) as response:
-                print(f"Status: {response.status}")
-                print(f"Content-type: {response.headers['content-type']}")
-                match response.status:
-                    case 404:
-                        raise WrongCodeException()
-                    case 200:
-                        json = await response.json(content_type=None)
-                        print(f"Raw response: {json}")
-                        return json
-                    case _:
-                        print(f"Unknown response: {response.text()}")
-                        raise Exception("Unknown response")
+            try:
+                async with session.get(
+                    f"http://{self.host}:8080/api/{endpoint}"
+                ) as response:
+                    print(f"Status: {response.status}")
+                    print(f"Content-type: {response.headers['content-type']}")
+                    match response.status:
+                        case 404:
+                            raise WrongCodeException()
+                        case 200:
+                            json = await response.json(content_type=None)
+                            print(f"Raw response: {json}")
+                            return json
+                        case _:
+                            print(f"Unknown response: {response.text()}")
+                            raise ApiException("Unknown response")
+            except aiohttp.ClientConnectorError as e:
+                raise ConnectException from e
 
     async def get_current_data(self) -> CurrentResponse:
         print(f"Fetching current data from {self.host}")
