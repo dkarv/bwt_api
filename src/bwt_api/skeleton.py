@@ -5,6 +5,8 @@ import asyncio
 
 
 from bwt_api import __version__
+import bwt_api
+from bwt_api.exception import BwtException, WrongCodeException, ConnectException
 from .api import BwtApi
 
 __author__ = "dkarv"
@@ -30,9 +32,9 @@ def parse_args(args):
         action="version",
         version=f"bwt_api {__version__}",
     )
-    parser.add_argument("--host", help="host")
-    parser.add_argument("--code", help="user code")
-    parser.add_argument(dest="cmd", choices=["current","daily","monthly","yearly"],default="current",help="Which data to fetch")
+    parser.add_argument("--host", help="host", required=True)
+    parser.add_argument("--code", help="user code", required=True)
+    parser.add_argument(dest="cmd", choices=["current","daily","monthly","yearly"], default="current", help="Which data to fetch")
     parser.add_argument(
         "-v",
         "--verbose",
@@ -64,8 +66,33 @@ def setup_logging(loglevel):
     )
 
 
+async def call(args):
+    async with BwtApi(args.host, args.code) as api:
+        try:
+            match args.cmd:
+                case "current":
+                    result = await api.get_current_data()
+                case "daily":
+                    result = await api.get_daily_data()
+                case "monthly":
+                    result = await api.get_monthly_data()
+                case "yearly":
+                    result = await api.get_yearly_data()
+                case _:
+                    print(f"Unknown cmd specified: {args.cmd}")
+                    raise BwtException
+            print(f"{result}")
+        except WrongCodeException:
+            print("Wrong code!")
+        except ConnectException:
+            print("Connection error")
+        except BwtException:
+            print("Something went wrong")
+
+
+
 def main(args):
-    """Test
+    """Main.
 
     Args:
       args (List[str]): command line parameters as list of strings
@@ -73,19 +100,7 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
-    _logger.debug("Start")
-    api = BwtApi(args.host, args.code)
-    match args.cmd:
-        case "current":
-            result = asyncio.run(api.get_current_data())
-        case "daily":
-            result = asyncio.run(api.get_daily_data())
-        case "monthly":
-            result = asyncio.run(api.get_monthly_data())
-        case "yearly":
-            result = asyncio.run(api.get_yearly_data())
-    print(f"{result}")
-    _logger.info("End")
+    asyncio.run(call(args))
 
 
 def run():
@@ -105,6 +120,6 @@ if __name__ == "__main__":
     # After installing your project with pip, users can also run your Python
     # modules as scripts via the ``-m`` flag, as defined in PEP 338::
     #
-    #     python -m bwt_api.skeleton 42
+    #     python -m bwt_api.skeleton
     #
     run()

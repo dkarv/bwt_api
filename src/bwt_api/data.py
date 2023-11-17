@@ -1,3 +1,6 @@
+"""Data objects received from the API."""
+
+
 from dataclasses import dataclass
 from bwt_api.error import BwtError
 

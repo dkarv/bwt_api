@@ -1,3 +1,6 @@
+"""Error enum values in the current data response."""
+
+
 import enum
 
 
