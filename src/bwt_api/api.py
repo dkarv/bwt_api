@@ -29,12 +29,15 @@ class BwtApi:
         auth = f"user:{code}"
         base64_auth = base64.b64encode(auth.encode("ascii")).decode("ascii")
         self._headers = {"Authorization": f"Basic {base64_auth}"}
+        self._session = aiohttp.ClientSession(headers=self._headers)
     
     async def __aenter__(self):
-        self._session = aiohttp.ClientSession(headers=self._headers)
         return self
 
     async def __aexit__(self, *err):
+        await self.close()
+
+    async def close(self):
         await self._session.close()
 
     async def __get_data(self, endpoint):
