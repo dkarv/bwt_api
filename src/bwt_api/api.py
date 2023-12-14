@@ -64,9 +64,8 @@ class BwtApi:
         """Get the current state of the BWT."""
         _logger.debug(f"Fetching current data from {self._host}")
         raw = await self.__get_data("GetCurrentData")
-        errors = map(
-            lambda error: BwtError(int(error)), raw["ActiveErrorIDs"].split(",")
-        )
+        errors = [BwtError(int(error)) for error in raw["ActiveErrorIDs"].split(",") if error]
+        
         in_hardness = Hardness(
             raw["HardnessIN_CaCO3"],
             raw["HardnessIN_dH"],
@@ -80,7 +79,7 @@ class BwtApi:
             raw["HardnessOUT_mmol_l"],
         )
         return CurrentResponse(
-            list(errors),
+            errors,
             raw["BlendedWaterSinceSetup_l"],
             raw["CapacityColumn1_ml_dH"],
             raw["CapacityColumn2_ml_dH"],
