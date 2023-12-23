@@ -2,6 +2,7 @@
 
 
 from dataclasses import dataclass
+from datetime import datetime
 from bwt_api.error import BwtError
 
 
@@ -25,10 +26,10 @@ class CurrentResponse:
     in_hardness: Hardness
     out_hardness: Hardness
     holiday_mode: int  # -1 or 0: inactive, 1: active, unix timestamp: start in future
-    regeneration_last_1: str  # date time
-    regeneration_last_2: str  # date time
-    service_customer: str
-    service_technician: str
+    regeneration_last_1: datetime
+    regeneration_last_2: datetime
+    service_customer: datetime 
+    service_technician: datetime
     out_of_service: int
     regeneration_count_1: int
     regeneration_count_2: int

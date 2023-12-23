@@ -5,6 +5,8 @@ from tokenize import String
 import aiohttp
 import base64
 import logging
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from bwt_api.error import BwtError
 from bwt_api.exception import ApiException, ConnectException, WrongCodeException
@@ -60,6 +62,12 @@ class BwtApi:
         except aiohttp.ClientConnectorError as e:
             raise ConnectException from e
 
+    def _convert_datetime(self, input: str) -> datetime:
+        # It looks like the device even shows everything in UTC
+        return datetime.strptime(
+            input, "%Y-%m-%d %H:%M:%S"
+        ).replace(tzinfo=ZoneInfo("UTC"))
+
     async def get_current_data(self) -> CurrentResponse:
         """Get the current state of the BWT."""
         _logger.debug(f"Fetching current data from {self._host}")
@@ -89,10 +97,10 @@ class BwtApi:
             in_hardness,
             out_hardness,
             raw["HolidayModeStartTime"],
-            raw["LastRegenerationColumn1"],
-            raw["LastRegenerationColumn2"],
-            raw["LastServiceCustomer"],
-            raw["LastServiceTechnican"],
+            self._convert_datetime(raw["LastRegenerationColumn1"]),
+            self._convert_datetime(raw["LastRegenerationColumn2"]),
+            self._convert_datetime(raw["LastServiceCustomer"]),
+            self._convert_datetime(raw["LastServiceTechnican"]),
             raw["OutOfService"],
             raw["RegenerationCounterColumn1"],
             raw["RegenerationCounterColumn2"],

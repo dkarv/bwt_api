@@ -1,3 +1,5 @@
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import pytest
 
 from bwt_api.api import BwtApi
@@ -128,10 +130,10 @@ async def test_current_data():
                 in_hardness=Hardness(caco3=374, dH=21, fH=37, mmol=4),
                 out_hardness=Hardness(caco3=71, dH=4, fH=7, mmol=1),
                 holiday_mode=0,
-                regeneration_last_1="2023-11-16 04:42:15",
-                regeneration_last_2="2023-11-15 04:41:48",
-                service_customer="2023-05-18 10:51:07",
-                service_technician="2021-01-25 13:14:06",
+                regeneration_last_1=datetime(2023, 11, 16, 4, 42,15,0,ZoneInfo("UTC")),
+                regeneration_last_2=datetime(2023, 11, 15, 4, 41,48,0,ZoneInfo("UTC")),
+                service_customer=datetime(2023, 5, 18, 10, 51,7,0,ZoneInfo("UTC")),
+                service_technician=datetime(2021, 1, 25, 13, 14,6,0,ZoneInfo("UTC")),
                 out_of_service=0,
                 regeneration_count_1=754,
                 regeneration_count_2=751,
@@ -162,10 +164,10 @@ async def test_empty_errors():
                 in_hardness=Hardness(caco3=374, dH=21, fH=37, mmol=4),
                 out_hardness=Hardness(caco3=71, dH=4, fH=7, mmol=1),
                 holiday_mode=0,
-                regeneration_last_1="2023-11-16 04:42:15",
-                regeneration_last_2="2023-11-15 04:41:48",
-                service_customer="2023-05-18 10:51:07",
-                service_technician="2021-01-25 13:14:06",
+                regeneration_last_1=datetime(2023, 11, 16, 4, 42,15,0,ZoneInfo("UTC")),
+                regeneration_last_2=datetime(2023, 11, 15, 4, 41,48,0,ZoneInfo("UTC")),
+                service_customer=datetime(2023, 5, 18, 10, 51,7,0,ZoneInfo("UTC")),
+                service_technician=datetime(2021, 1, 25, 13, 14,6,0,ZoneInfo("UTC")),
                 out_of_service=0,
                 regeneration_count_1=754,
                 regeneration_count_2=751,
