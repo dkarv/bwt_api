@@ -44,7 +44,7 @@ class CurrentResponse:
     regenerativ_level: int  # %
     regenerativ_days: int  # days left
     regenerativ_total: int  # g
-    show_error: BwtStatus
+    state: BwtStatus
     treated_day: int  # treated water current day
     treated_month: int  # treated water current month
     treated_year: int  # treated water current year
