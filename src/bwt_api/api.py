@@ -10,15 +10,9 @@ from zoneinfo import ZoneInfo
 
 from bwt_api.error import BwtError
 from bwt_api.exception import ApiException, ConnectException, WrongCodeException
-
-from bwt_api.data import CurrentResponse, DailyResponse, MonthlyResponse, YearlyResponse
-from bwt_api.data import Hardness
+from bwt_api.data import CurrentResponse, DailyResponse, MonthlyResponse, YearlyResponse, Hardness, BwtStatus
 
 _logger = logging.getLogger(__name__)
-
-class RestApi:
-    """Rest functionality encapsulated for testing."""
-
 
 class BwtApi:
     """BWT Api."""
@@ -63,7 +57,7 @@ class BwtApi:
             raise ConnectException from e
 
     def _convert_datetime(self, input: str) -> datetime:
-        # It looks like the device even shows everything in UTC
+        # It looks like the device sends and even shows everything in UTC
         return datetime.strptime(
             input, "%Y-%m-%d %H:%M:%S"
         ).replace(tzinfo=ZoneInfo("UTC"))
@@ -108,7 +102,7 @@ class BwtApi:
             raw["RegenerativLevel"],
             raw["RegenerativRemainingDays"],
             raw["RegenerativSinceSetup_g"],
-            raw["ShowError"],
+            BwtStatus(int(raw["ShowError"])),
             raw["WaterTreatedCurrentDay_l"],
             raw["WaterTreatedCurrentMonth_l"],
             raw["WaterTreatedCurrentYear_l"],

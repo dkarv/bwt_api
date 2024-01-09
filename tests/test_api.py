@@ -4,7 +4,8 @@ import pytest
 
 from bwt_api.api import BwtApi
 from bwt_api.error import BwtError
-from bwt_api.data import CurrentResponse, Hardness
+from bwt_api.data import CurrentResponse, Hardness, BwtStatus
+
 from aioresponses import aioresponses
 
 from bwt_api.exception import ApiException, ConnectException, WrongCodeException
@@ -43,7 +44,7 @@ current_json = """
    "RegenerativLevel" : 20,
    "RegenerativRemainingDays" : 26,
    "RegenerativSinceSetup_g" : 245846,
-   "ShowError" : 1,
+   "ShowError" : 2,
    "WaterSinceSetup_l" : 261633,
    "WaterTreatedCurrentDay_l" : 181,
    "WaterTreatedCurrentMonth_l" : 3137,
@@ -80,7 +81,7 @@ current_json_empty_errors = """
    "RegenerativLevel" : 20,
    "RegenerativRemainingDays" : 26,
    "RegenerativSinceSetup_g" : 245846,
-   "ShowError" : 1,
+   "ShowError" : 0,
    "WaterSinceSetup_l" : 261633,
    "WaterTreatedCurrentDay_l" : 181,
    "WaterTreatedCurrentMonth_l" : 3137,
@@ -141,7 +142,7 @@ async def test_current_data():
                 regenerativ_level=20,
                 regenerativ_days=26,
                 regenerativ_total=245846,
-                show_error=1,
+                show_error=BwtStatus.ERROR,
                 treated_day=181,
                 treated_month=3137,
                 treated_year=80700,
@@ -175,7 +176,7 @@ async def test_empty_errors():
                 regenerativ_level=20,
                 regenerativ_days=26,
                 regenerativ_total=245846,
-                show_error=1,
+                show_error=BwtStatus.OK,
                 treated_day=181,
                 treated_month=3137,
                 treated_year=80700,

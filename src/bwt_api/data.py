@@ -1,10 +1,17 @@
 """Data objects received from the API."""
 
 
+import enum
+
 from dataclasses import dataclass
 from datetime import datetime
 from bwt_api.error import BwtError
 
+
+class BwtStatus(enum.Enum):
+    OK = 0
+    WARNING = 1
+    ERROR = 2
 
 @dataclass
 class Hardness:
@@ -37,7 +44,7 @@ class CurrentResponse:
     regenerativ_level: int  # %
     regenerativ_days: int  # days left
     regenerativ_total: int  # g
-    show_error: int  # 0: ok/blue, 1: warning/yellow, 2: error/red
+    show_error: BwtStatus
     treated_day: int  # treated water current day
     treated_month: int  # treated water current month
     treated_year: int  # treated water current year
