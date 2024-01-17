@@ -132,3 +132,9 @@ class BwtApi:
         raw = await self.__get_data("GetYearlyData")
         keys = [f"Month{month:02}_l" for month in range(1, 13)]
         return YearlyResponse(list(map(lambda k: raw[k], keys)))
+
+def treated_to_blended(treated: int, hardness_in: int, hardness_out: int) -> float:
+    if (hardness_in == 0 | hardness_in == hardness_out):
+        return treated
+
+    return treated / (1.0 - hardness_out / hardness_in)

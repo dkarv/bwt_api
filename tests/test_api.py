@@ -2,7 +2,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import pytest
 
-from bwt_api.api import BwtApi
+from bwt_api.api import BwtApi, treated_to_blended
 from bwt_api.error import BwtError
 from bwt_api.data import CurrentResponse, Hardness, BwtStatus
 
@@ -181,3 +181,10 @@ async def test_empty_errors():
                 treated_month=3137,
                 treated_year=80700,
             )
+
+def test_treated_to_blended():
+    assert treated_to_blended(0, 21, 4) == 0
+    assert treated_to_blended(100, 21, 21) == 100
+    assert treated_to_blended(10, 20, 4) == 12.5
+    assert treated_to_blended(306, 21, 4) == 378
+    assert treated_to_blended(191, 21, 4) == pytest.approx(235.9411)
