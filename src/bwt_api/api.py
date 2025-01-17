@@ -67,6 +67,7 @@ class BwtApi:
         _logger.debug(f"Fetching current data from {self._host}")
         raw = await self.__get_data("GetCurrentData")
         errors = [BwtError(int(error)) for error in raw["ActiveErrorIDs"].split(",") if error]
+        perla_one = raw["CapacityColumn2_ml_dH"] == -1
         
         in_hardness = Hardness(
             raw["HardnessIN_CaCO3"],
@@ -106,6 +107,7 @@ class BwtApi:
             raw["WaterTreatedCurrentDay_l"],
             raw["WaterTreatedCurrentMonth_l"],
             raw["WaterTreatedCurrentYear_l"],
+            1 if perla_one else 2,
         )
 
     async def get_daily_data(self) -> DailyResponse:

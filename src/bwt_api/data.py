@@ -48,6 +48,7 @@ class CurrentResponse:
     treated_day: int  # treated water current day
     treated_month: int  # treated water current month
     treated_year: int  # treated water current year
+    columns: int # number of columns: 2 for BWT Duo and 1 for BWT Perla One
 
 
 @dataclass
