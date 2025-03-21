@@ -57,10 +57,10 @@ class BwtApi:
             raise ConnectException from e
 
     def _convert_datetime(self, input: str) -> datetime:
-        # It looks like the device sends and even shows everything in UTC
+        # It looks like the device sends and even shows everything in local time
         return datetime.strptime(
             input, "%Y-%m-%d %H:%M:%S"
-        ).replace(tzinfo=ZoneInfo("UTC"))
+        )# .replace(tzinfo=ZoneInfo("UTC"))
 
     async def get_current_data(self) -> CurrentResponse:
         """Get the current state of the BWT."""
