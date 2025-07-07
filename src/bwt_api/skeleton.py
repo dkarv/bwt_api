@@ -5,7 +5,6 @@ import asyncio
 
 
 from bwt_api import __version__
-import bwt_api
 from bwt_api.exception import BwtException, WrongCodeException, ConnectException
 from .api import BwtApi
 
