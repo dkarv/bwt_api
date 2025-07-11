@@ -17,7 +17,7 @@ __license__ = "MIT"
 
 current_json = """
 {
-   "ActiveErrorIDs" : "5,32,34",
+   "ActiveErrorIDs" : "5,32,34,29",
    "BlendedWaterSinceSetup_l" : 318383,
    "CapacityColumn1_ml_dH" : 5485275,
    "CapacityColumn2_ml_dH" : 3833994,
@@ -158,6 +158,7 @@ async def test_current_data():
                     BwtError.REGENERATIV_20,
                     BwtError.MAINTENANCE_CUSTOMER,
                     BwtError.MAINTENANCE_SERVICE,
+                    BwtError.UNKNOWN,
                 ],
                 blended_total=318383,
                 capacity_1=5485275,

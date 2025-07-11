@@ -5,6 +5,7 @@ import enum
 
 
 class BwtError(enum.Enum):
+    UNKNOWN = -1 # Fallback for unknown errors
     OFFLINE_MOTOR_1 = 1
     OFFLINE_MOTOR_2 = 2
     OFFLINE_MOTOR_BLEND = 3
@@ -48,6 +49,17 @@ class BwtError(enum.Enum):
     EXTERNAL_FILTER_CHANGE = 74
     BRINE_UNSATURATED = 75
     DOSING_FAULT = 88
+
+    def __new__(cls, value):
+        obj = object.__new__(cls)
+        obj._value_ = value
+        return obj
+
+    @classmethod
+    def _missing_(cls, value):
+        obj = cls.UNKNOWN
+        obj._value_ = value
+        return obj
 
     def is_fatal(self) -> bool:
         return self not in WARNING_CODES
