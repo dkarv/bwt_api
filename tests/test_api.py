@@ -140,6 +140,15 @@ async def test_connect_error():
             await api.get_current_data()
 
 
+async def test_timeout_error():
+    """Timeouts should be wrapped as ConnectException, not escape as raw TimeoutError."""
+    with aioresponses() as mocked:
+        mocked.get("http://host:8080/api/GetCurrentData", exception=TimeoutError())
+        async with BwtApi("host", "code") as api:
+            with pytest.raises(ConnectException):
+                await api.get_current_data()
+
+
 async def test_unknown_response():
     with aioresponses() as mocked:
         mocked.get("http://host:8080/api/GetCurrentData", status=400, body="")
