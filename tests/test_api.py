@@ -148,6 +148,15 @@ async def test_unknown_response():
                 await api.get_current_data()
 
 
+async def test_invalid_json_response():
+    """HTTP 200 with non-JSON body should raise ApiException, not JSONDecodeError."""
+    with aioresponses() as mocked:
+        mocked.get("http://host:8080/api/GetCurrentData", status=200, body="not json")
+        async with BwtApi("host", "code") as api:
+            with pytest.raises(ApiException):
+                await api.get_current_data()
+
+
 async def test_current_data():
     with aioresponses() as mocked:
         mocked.get("http://host:8080/api/GetCurrentData", status=200, body=current_json)
