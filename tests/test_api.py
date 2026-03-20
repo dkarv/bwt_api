@@ -167,7 +167,7 @@ async def test_current_data():
                     BwtError.REGENERATIV_20,
                     BwtError.MAINTENANCE_CUSTOMER,
                     BwtError.MAINTENANCE_SERVICE,
-                    BwtError.UNKNOWN,
+                    BwtError(29),
                 ],
                 blended_total=318383,
                 capacity_1=5485275,
@@ -265,6 +265,20 @@ async def test_perla_one():
                 treated_year=500,
                 columns=1,
             )
+
+def test_unknown_error_no_mutation():
+    """Unknown error codes must not mutate the UNKNOWN singleton."""
+    err1 = BwtError(29)
+    assert err1.value == 29
+    assert err1.name == "UNKNOWN_29"
+    err2 = BwtError(123)
+    assert err2.value == 123
+    assert err2.name == "UNKNOWN_123"
+    # UNKNOWN singleton must be untouched
+    assert BwtError.UNKNOWN.value == -1
+    # Different unknown codes produce different instances
+    assert err1 is not err2
+
 
 def test_treated_to_blended():
     assert treated_to_blended(0, 21, 4) == 0

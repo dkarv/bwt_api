@@ -57,9 +57,18 @@ class BwtError(enum.Enum):
 
     @classmethod
     def _missing_(cls, value):
-        obj = cls.UNKNOWN
+        obj = object.__new__(cls)
         obj._value_ = value
+        obj._name_ = f"UNKNOWN_{value}"
         return obj
+
+    def __eq__(self, other):
+        if isinstance(other, BwtError):
+            return self._value_ == other._value_
+        return NotImplemented
+
+    def __hash__(self):
+        return hash(self._value_)
 
     def is_fatal(self) -> bool:
         return self not in WARNING_CODES
