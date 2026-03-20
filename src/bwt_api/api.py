@@ -66,7 +66,7 @@ class BwtApi:
         _logger.debug(f"Fetching current data from {self._host}")
         raw = await self.__get_data("GetCurrentData")
         errors = [BwtError(int(error)) for error in raw["ActiveErrorIDs"].split(",") if error]
-        if BwtError.UNKNOWN in errors:
+        if any(e.name.startswith("UNKNOWN") for e in errors):
             _logger.warning(f"Unknown error in current data response {raw['ActiveErrorIDs']}")
         perla_one = raw["CapacityColumn2_ml_dH"] == -1
         
