@@ -272,3 +272,5 @@ def test_treated_to_blended():
     assert treated_to_blended(10, 20, 4) == 12.5
     assert treated_to_blended(306, 21, 4) == 378
     assert treated_to_blended(191, 21, 4) == pytest.approx(235.9411)
+    # Edge case: hardness_in == 0 should return treated as-is, not divide by zero
+    assert treated_to_blended(100, 0, 0) == 100
