@@ -52,7 +52,7 @@ class BwtApi:
                     else:
                         _logger.warning(f"Unknown response with status {response.status}: {text}")
                         raise ApiException(f"Unknown response: {text}")
-        except aiohttp.ClientConnectorError as e:
+        except (aiohttp.ClientConnectorError, TimeoutError) as e:
             raise ConnectException from e
 
     def _convert_datetime(self, input: str) -> datetime:
@@ -168,7 +168,7 @@ class BwtSilkApi:
                     text = await response.text()
                     _logger.warning(f"Unknown response with status {response.status}: {text}")
                     raise ApiException(f"Unknown response: {text}")
-        except aiohttp.ClientConnectorError as e:
+        except (aiohttp.ClientConnectorError, TimeoutError) as e:
             raise ConnectException from e
 
 
