@@ -41,7 +41,10 @@ class BwtApi:
             async with self._session.get(f"http://{self._host}:8080/api/{endpoint}") as response:
                 _logger.debug(f"Response status: {response.status}, content-type: {response.headers['content-type']}")
                 if (response.status == 200):
-                    json = await response.json(content_type=None)
+                    try:
+                        json = await response.json(content_type=None)
+                    except ValueError as e:
+                        raise ApiException(f"Invalid JSON response from {endpoint}") from e
                     _logger.debug(f"Raw response: {json}")
                     return json
                 else:
@@ -161,7 +164,10 @@ class BwtSilkApi:
             async with self._session.get(f"http://{self._host}:80/silk/registers") as response:
                 _logger.debug(f"Response status: {response.status}, content-type: {response.headers['content-type']}")
                 if (response.status == 200):
-                    json = await response.json(content_type=None)
+                    try:
+                        json = await response.json(content_type=None)
+                    except ValueError as e:
+                        raise ApiException(f"Invalid JSON response from silk/registers") from e
                     _logger.debug(f"Raw response: {json}")
                     return json["params"]
                 else:
