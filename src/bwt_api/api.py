@@ -179,7 +179,7 @@ class BwtSilkApi:
 
 
 def treated_to_blended(treated: int, hardness_in: int, hardness_out: int) -> float:
-    if (hardness_in == 0 | hardness_in == hardness_out):
+    if hardness_in == 0 or hardness_in == hardness_out:
         return treated
 
     return treated / (1.0 - hardness_out / hardness_in)
