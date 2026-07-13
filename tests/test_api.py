@@ -1,12 +1,24 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from unittest.mock import Mock
 import pytest
+from aiohttp.client_reqrep import ClientResponse
 
-from bwt_api.api import BwtApi, treated_to_blended
+from bwt_api.api import BwtApi, BwtSmartDosApi, treated_to_blended
 from bwt_api.error import BwtError
-from bwt_api.data import CurrentResponse, Hardness, BwtStatus
+from bwt_api.data import CurrentResponse, Hardness, BwtStatus, SmartDosStatus, SubstanceType
 
 from aioresponses import aioresponses
+
+# Compatibility shim for aioresponses with aiohttp 3.14+.
+_original_client_response_init = ClientResponse.__init__
+
+def _compat_client_response_init(self, method, url, *args, stream_writer=None, **kwargs):
+    if stream_writer is None:
+        stream_writer = Mock(output_size=0)
+    return _original_client_response_init(self, method, url, *args, stream_writer=stream_writer, **kwargs)
+
+ClientResponse.__init__ = _compat_client_response_init
 
 from bwt_api.exception import ApiException, ConnectException, WrongCodeException
 
@@ -288,6 +300,52 @@ def test_unknown_error_no_mutation():
     # Different unknown codes produce different instances
     assert err1 is not err2
 
+async def test_smartdos_get_gatt_0201():
+    with aioresponses() as mocked:
+        mocked.get(
+            "http://host:80/api/v1/gatt/0201",
+            status=200,
+            body='{"characteristic":"0201","value":[1,2,3]}',
+            headers={"Content-Type": "application/json"},
+        )
+        async with BwtSmartDosApi("host") as api:
+            result = await api.get_gatt_0201()
+            assert result == {"characteristic": "0201", "value": [1, 2, 3]}
+
+
+async def test_smartdos_unknown_response():
+    with aioresponses() as mocked:
+        mocked.get("http://host:80/api/v1/gatt/0201", status=404, body="Not Found")
+        async with BwtSmartDosApi("host") as api:
+            with pytest.raises(ApiException):
+                await api.get_gatt_0201()
+
+
+async def test_smartdos_device_info_parses_status_values():
+    with aioresponses() as mocked:
+        mocked.get(
+            "http://host:80/api/v1/gatt/0201",
+            status=200,
+            body='{"fwRev":"1.1.0+4","hwRev":"2.4.0(B)","productCode":"8R19-CX2A","uptime":4889,"operatingTime":706889,"devState":2001,"activeStates":[2001],"commDate":"2024-12-04T13:45:38.833Z"}',
+            headers={"Content-Type": "application/json"},
+        )
+        async with BwtSmartDosApi("host") as api:
+            result = await api.get_device_info()
+            assert result.dev_state == SmartDosStatus.STANDBY
+            assert result.active_states == [SmartDosStatus.STANDBY]
+
+
+async def test_smartdos_pouch_info_parses_substance_type():
+    with aioresponses() as mocked:
+        mocked.get(
+            "http://host:80/api/v1/gatt/0401",
+            status=200,
+            body='{"totCap":10000,"expDate":"05.12.2025","orderNr":125123456,"batchNr":12345,"id":2,"unit":0}',
+            headers={"Content-Type": "application/json"},
+        )
+        async with BwtSmartDosApi("host") as api:
+            result = await api.get_pouch_info()
+            assert result.substance_type == SubstanceType.L2_L3
 
 def test_treated_to_blended():
     assert treated_to_blended(0, 21, 4) == 0

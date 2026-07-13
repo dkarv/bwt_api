@@ -13,6 +13,38 @@ class BwtStatus(enum.Enum):
     WARNING = 1
     ERROR = 2
 
+
+class SmartDosStatus(enum.IntEnum):
+    STANDBY = 2001
+    METERING_ACTIVE = 2002
+    MINERAL_CONTAINER_LEVEL_LOW = 7001
+    MINERAL_CONTAINER_EMPTY = 7002
+    SMART_MINERAL_RUNNING_LOW = 7003
+    SMART_MINERAL_RUN_OUT = 7004
+    AQA_VOLUME_ALARM = 7005
+    AQA_WATCH_ALARM = 7006
+    AQA_MAXFLOW_ALARM = 7007
+    PUMP_FAULT = 8001
+    PUMP_POWER_FAULT = 8002
+    PUMP_CONTROL_FAULT = 8003
+
+    @classmethod
+    def _missing_(cls, value):
+        return None
+
+
+class SubstanceType(enum.IntEnum):
+    L1_LE = 1
+    L2_L3 = 2
+    L4 = 3
+    CU2 = 4
+    FLUSHING_SOLUTION = 5
+
+    @classmethod
+    def _missing_(cls, value):
+        return None
+
+
 @dataclass
 class Hardness:
     caco3: int  # ppm CACO3
@@ -67,3 +99,74 @@ class MonthlyResponse:
 class YearlyResponse:
     # treated water in 1 month intervals
     values: list[int]
+
+
+# Smart DOS API Data Classes
+
+@dataclass
+class WifiResponse:
+    """UUID 0104: Wi-Fi Information"""
+    ssid: str  # Wi-Fi network name
+    rssi: int  # Wi-Fi signal strength in dBm
+
+
+@dataclass
+class DeviceInfoResponse:
+    """UUID 0201: Device Information"""
+    fw_rev: str  # Firmware Revision
+    hw_rev: str  # Hardware Revision
+    product_code: str  # Product Code
+    uptime: int  # Operating time since last reboot (seconds)
+    operating_time: int  # Operating time since first reboot (seconds)
+    dev_state: SmartDosStatus | None  # Current device status
+    active_states: list[SmartDosStatus | None]  # List of active device statuses
+    comm_date: str  # Start-up date (ISO format)
+
+
+@dataclass
+class ConfigurationResponse:
+    """UUID 0202: Configuration"""
+    buzzer_en: bool  # Buzzer active
+    dosing_rate: float  # Metering rate (ml/m³)
+    aqa_volume_en: bool  # AQA Volume active
+    aqa_watch_en: bool  # AQA Watch active
+    aqa_max_flow_en: bool  # AQA MaxFlow active
+    aqa_volume_val: float  # AQA Volume value (l)
+
+
+@dataclass
+class TimeResponse:
+    """UUID 0208: Time and Timezone"""
+    time: int  # Unix timestamp (seconds since 1970-01-01)
+    timezone: str  # Timezone string
+
+
+@dataclass
+class PouchInfoResponse:
+    """UUID 0401: Pouch/Container Information"""
+    tot_cap: float  # Pouch volume (ml)
+    exp_date: str  # Substance expiry date (DD.MM.YYYY)
+    order_nr: int  # Order number
+    batch_nr: int  # Batch number
+    substance_type: SubstanceType | None  # Substance type ID
+    unit: int  # Unit (0 = ml)
+
+
+@dataclass
+class RemainingCapacityResponse:
+    """UUID 0402: Remaining Capacity"""
+    rem_capacity: float  # Remaining volume in ml
+    rem_capacity_pct: float  # Remaining volume in %
+    rem_capacity_days: int  # Remaining volume in days
+
+
+@dataclass
+class TreatedWaterResponse:
+    """UUID 0503: Treated Water"""
+    total_flow: int  # Total treated water in ml
+
+
+@dataclass
+class SubstanceDosageResponse:
+    """UUID 0505: Substance Dosage"""
+    dosed_mineral: float  # Substance dosage quantity since start-up (ml)
