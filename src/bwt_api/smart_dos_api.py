@@ -115,9 +115,9 @@ class BwtSmartDosApi:
         self._logger.debug("Fetching remaining capacity from %s", self._host)
         raw = await self._get_gatt("0402")
         return RemainingCapacityResponse(
-            rem_capacity=raw["remCapacity"],
-            rem_capacity_pct=raw["remCapacityPct"],
-            rem_capacity_days=raw["remCapacityDays"],
+            rem_capacity=raw.get("remCapacity"),
+            rem_capacity_pct=raw.get("remCapacityPct"),
+            rem_capacity_days=raw.get("remCapacityDays"),
         )
 
     async def get_treated_water(self) -> TreatedWaterResponse:

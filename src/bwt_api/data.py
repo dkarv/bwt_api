@@ -5,6 +5,7 @@ import enum
 
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional
 from bwt_api.error import BwtError
 
 
@@ -155,9 +156,9 @@ class PouchInfoResponse:
 @dataclass
 class RemainingCapacityResponse:
     """UUID 0402: Remaining Capacity"""
-    rem_capacity: float  # Remaining volume in ml
-    rem_capacity_pct: float  # Remaining volume in %
-    rem_capacity_days: int  # Remaining volume in days
+    rem_capacity: Optional[float]  # Remaining volume in ml
+    rem_capacity_pct: Optional[float]  # Remaining volume in %
+    rem_capacity_days: Optional[int]  # Remaining volume in days
 
 
 @dataclass
