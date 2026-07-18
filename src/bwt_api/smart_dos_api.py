@@ -18,17 +18,16 @@ from bwt_api.data import (
 )
 from bwt_api.exception import ApiException, ConnectException
 
-_logger = logging.getLogger(__name__)
-
 
 class BwtSmartDosApi:
     """BWT Smart Dos Api."""
     _session: aiohttp.ClientSession
     _host: str
 
-    def __init__(self, host: str):
+    def __init__(self, host: str, logger: logging.Logger = logging.getLogger(__name__)):
         self._host = host
         self._session = aiohttp.ClientSession()
+        self._logger = logger
 
     async def __aenter__(self):
         return self
@@ -43,28 +42,30 @@ class BwtSmartDosApi:
         """Internal method to fetch GATT characteristic JSON."""
         try:
             async with self._session.get(f"http://{self._host}:80/api/v1/gatt/{uuid}") as response:
-                _logger.debug(
-                    f"Response status: {response.status}, content-type: {response.headers['content-type']}"
+                self._logger.debug(
+                    "Response status: %s, content-type: %s",
+                    response.status,
+                    response.headers['content-type']
                 )
                 if response.status == 200:
                     json = await response.json(content_type=None)
-                    _logger.debug(f"Raw response for UUID {uuid}: {json}")
+                    self._logger.debug("Raw response for UUID %s: %s", uuid, json)
                     return json
                 text = await response.text()
-                _logger.warning(f"Unknown response with status {response.status}: {text}")
+                self._logger.warning("Unknown response with status %s: %s", response.status, text)
                 raise ApiException(f"Unknown response: {text}")
         except aiohttp.ClientConnectorError as e:
             raise ConnectException from e
 
     async def get_wifi_info(self) -> WifiResponse:
         """UUID 0104: Get Wi-Fi name and signal strength."""
-        _logger.debug(f"Fetching Wi-Fi info from {self._host}")
+        self._logger.debug("Fetching Wi-Fi info from %s", self._host)
         raw = await self._get_gatt("0104")
         return WifiResponse(ssid=raw["ssid"], rssi=raw["rssi"])
 
     async def get_device_info(self) -> DeviceInfoResponse:
         """UUID 0201: Get device information."""
-        _logger.debug(f"Fetching device info from {self._host}")
+        self._logger.debug("Fetching device info from %s", self._host)
         raw = await self._get_gatt("0201")
         return DeviceInfoResponse(
             fw_rev=raw["fwRev"],
@@ -79,7 +80,7 @@ class BwtSmartDosApi:
 
     async def get_configuration(self) -> ConfigurationResponse:
         """UUID 0202: Get device configuration."""
-        _logger.debug(f"Fetching configuration from {self._host}")
+        self._logger.debug("Fetching configuration from %s", self._host)
         raw = await self._get_gatt("0202")
         return ConfigurationResponse(
             buzzer_en=raw["buzzerEn"],
@@ -92,13 +93,13 @@ class BwtSmartDosApi:
 
     async def get_time_info(self) -> TimeResponse:
         """UUID 0208: Get time and timezone information."""
-        _logger.debug(f"Fetching time info from {self._host}")
+        self._logger.debug("Fetching time info from %s", self._host)
         raw = await self._get_gatt("0208")
         return TimeResponse(time=raw["time"], timezone=raw["timezone"])
 
     async def get_pouch_info(self) -> PouchInfoResponse:
         """UUID 0401: Get pouch/container information."""
-        _logger.debug(f"Fetching pouch info from {self._host}")
+        self._logger.debug("Fetching pouch info from %s", self._host)
         raw = await self._get_gatt("0401")
         return PouchInfoResponse(
             tot_cap=raw["totCap"],
@@ -111,7 +112,7 @@ class BwtSmartDosApi:
 
     async def get_remaining_capacity(self) -> RemainingCapacityResponse:
         """UUID 0402: Get remaining capacity information."""
-        _logger.debug(f"Fetching remaining capacity from {self._host}")
+        self._logger.debug("Fetching remaining capacity from %s", self._host)
         raw = await self._get_gatt("0402")
         return RemainingCapacityResponse(
             rem_capacity=raw["remCapacity"],
@@ -121,14 +122,14 @@ class BwtSmartDosApi:
 
     async def get_treated_water(self) -> TreatedWaterResponse:
         """UUID 0503: Get treated water information."""
-        _logger.debug(f"Fetching treated water from {self._host}")
+        self._logger.debug("Fetching treated water from %s", self._host)
         raw = await self._get_gatt("0503")
         total_flow = raw["flow"]["1"]["totFlow"]
         return TreatedWaterResponse(total_flow=total_flow)
 
     async def get_substance_dosage(self) -> SubstanceDosageResponse:
         """UUID 0505: Get substance dosage information."""
-        _logger.debug(f"Fetching substance dosage from {self._host}")
+        self._logger.debug("Fetching substance dosage from %s", self._host)
         raw = await self._get_gatt("0505")
         return SubstanceDosageResponse(dosed_mineral=raw["dosedMineral"])
 
