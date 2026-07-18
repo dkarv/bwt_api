@@ -5,17 +5,16 @@ import logging
 
 from bwt_api.exception import ApiException, ConnectException
 
-_logger = logging.getLogger(__name__)
-
 
 class BwtSilkApi:
     """BWT Silk Api."""
     _session: aiohttp.ClientSession
     _host: str
 
-    def __init__(self, host):
+    def __init__(self, host, logger: logging.Logger = logging.getLogger(__name__)):
         self._host = host
         self._session = aiohttp.ClientSession()
+        self._logger = logger
 
     async def __aenter__(self):
         return self
@@ -30,16 +29,18 @@ class BwtSilkApi:
         """Internal method to fetch json from the endpoint and handle general errors."""
         try:
             async with self._session.get(f"http://{self._host}:80/silk/registers") as response:
-                _logger.debug(
-                    f"Response status: {response.status}, content-type: {response.headers['content-type']}"
+                self._logger.debug(
+                    "Response status: %s, content-type: %s",
+                    response.status,
+                    response.headers['content-type']
                 )
                 if response.status == 200:
                     json = await response.json(content_type=None)
-                    _logger.debug(f"Raw response: {json}")
+                    self._logger.debug("Raw response: %s", json)
                     return json["params"]
                 else:
                     text = await response.text()
-                    _logger.warning(f"Unknown response with status {response.status}: {text}")
+                    self._logger.warning("Unknown response with status %s: %s", response.status, text)
                     raise ApiException(f"Unknown response: {text}")
         except aiohttp.ClientConnectorError as e:
             raise ConnectException from e

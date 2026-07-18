@@ -12,8 +12,6 @@ __author__ = "dkarv"
 __copyright__ = "dkarv"
 __license__ = "MIT"
 
-_logger = logging.getLogger(__name__)
-
 
 def parse_args(args):
     """Parse command line parameters
