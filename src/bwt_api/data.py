@@ -109,6 +109,15 @@ class WifiResponse:
     """UUID 0104: Wi-Fi Information"""
     ssid: str  # Wi-Fi network name
     rssi: int  # Wi-Fi signal strength in dBm
+    rssiAvg: str  # Average Wi-Fi signal strength in dBm
+    rssiSig: str  # Signal strength standard deviation in dBm
+    dhcp: bool  # DHCP enabled
+    ip: str | None  # IP address
+    sn: str | None  # Serial number
+    sg: str | None  # Subnet mask
+    pDns: str | None  # Primary DNS
+    sDns: str | None  # Secondary DNS
+    mac: str | None  # MAC address
 
 
 @dataclass
@@ -122,7 +131,11 @@ class DeviceInfoResponse:
     dev_state: SmartDosStatus | None  # Current device status
     active_states: list[SmartDosStatus | None]  # List of active device statuses
     comm_date: str  # Start-up date (ISO format)
-
+    device_id: str  # Device ID
+    device_type: str  # Device type
+    device_variant: str  # Device variant
+    total_flow: int  # Total treated water in ml
+    total_dosed: int  # Total dosed substance in ml
 
 @dataclass
 class ConfigurationResponse:
@@ -133,6 +146,12 @@ class ConfigurationResponse:
     aqa_watch_en: bool  # AQA Watch active
     aqa_max_flow_en: bool  # AQA MaxFlow active
     aqa_volume_val: float  # AQA Volume value (l)
+    volume_per_stroke: float  # Volume per stroke (ml)
+    pouch_empty_timeout: int  # Pouch empty timeout (s)
+    pouch_not_empty_timeout: int  # Pouch not empty timeout (s)
+    aqa_watch_val: int  # AQA Watch value (s)
+    aqa_max_flow_val: float  # AQA MaxFlow value (l/h)
+    rest_server_en: bool  # REST server active
 
 
 @dataclass
@@ -156,15 +175,17 @@ class PouchInfoResponse:
 @dataclass
 class RemainingCapacityResponse:
     """UUID 0402: Remaining Capacity"""
-    rem_capacity: Optional[float]  # Remaining volume in ml
-    rem_capacity_pct: Optional[float]  # Remaining volume in %
-    rem_capacity_days: Optional[int]  # Remaining volume in days
+    rem_capacity: float  # Remaining volume in ml
+    rem_capacity_pct: float  # Remaining volume in %
+    rem_capacity_days: int  # Remaining volume in days
+    unit: int  # Unit (0 = ml)
 
 
 @dataclass
 class TreatedWaterResponse:
     """UUID 0503: Treated Water"""
     total_flow: int  # Total treated water in ml
+    total_ticks: int  # Total treated water ticks??
 
 
 @dataclass

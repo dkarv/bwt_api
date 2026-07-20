@@ -1,5 +1,7 @@
 """The BWT Smart Dos API class."""
 
+from collections.abc import Mapping
+
 import aiohttp
 import logging
 from typing import Any
@@ -61,7 +63,19 @@ class BwtSmartDosApi:
         """UUID 0104: Get Wi-Fi name and signal strength."""
         self._logger.debug("Fetching Wi-Fi info from %s", self._host)
         raw = await self._get_gatt("0104")
-        return WifiResponse(ssid=raw["ssid"], rssi=raw["rssi"])
+        return WifiResponse(
+            ssid=raw["ssid"], 
+            rssi=raw["rssi"],
+            rssiAvg=raw["rssiAvg"],
+            rssiSig=raw["rssiSig"],
+            dhcp=raw["dhcp"],
+            ip=raw["ip"],
+            sn=raw["sn"],
+            sg=raw["sg"],
+            pDns=raw["pDns"],
+            sDns=raw["sDns"],
+            mac=raw["mac"]
+        )
 
     async def get_device_info(self) -> DeviceInfoResponse:
         """UUID 0201: Get device information."""
@@ -71,11 +85,16 @@ class BwtSmartDosApi:
             fw_rev=raw["fwRev"],
             hw_rev=raw["hwRev"],
             product_code=raw["productCode"],
+            device_id=raw["iotDevId"],
+            device_type=raw["iotDevType"],
+            device_variant=raw["iotDevVariant"],
             uptime=raw["uptime"],
             operating_time=raw["operatingTime"],
             dev_state=SmartDosStatus(raw["devState"]),
             active_states=[SmartDosStatus(state) for state in raw["activeStates"]],
             comm_date=raw["commDate"],
+            total_flow=raw["lifeTimeFlow_ml"],
+            total_dosed=raw["lifeTimeDosed_ml"],
         )
 
     async def get_configuration(self) -> ConfigurationResponse:
@@ -85,10 +104,16 @@ class BwtSmartDosApi:
         return ConfigurationResponse(
             buzzer_en=raw["buzzerEn"],
             dosing_rate=raw["dosingRate"],
+            volume_per_stroke=raw["volumePerStroke"],
+            pouch_empty_timeout=raw["pouchEmptyTimeout"],
+            pouch_not_empty_timeout=raw["pouchNotEmptyTimeout"],
             aqa_volume_en=raw["aqaVolumeEn"],
             aqa_watch_en=raw["aqaWatchEn"],
             aqa_max_flow_en=raw["aqaMaxFlowEn"],
             aqa_volume_val=raw["aqaVolumeVal"],
+            aqa_watch_val=raw["aqaWatchVal"],
+            aqa_max_flow_val=raw["aqaMaxFlowVal"],
+            rest_server_en=raw["restServerEn"],
         )
 
     async def get_time_info(self) -> TimeResponse:
@@ -110,22 +135,24 @@ class BwtSmartDosApi:
             unit=raw["unit"],
         )
 
-    async def get_remaining_capacity(self) -> RemainingCapacityResponse:
+    async def get_remaining_capacity(self) -> Mapping[int, RemainingCapacityResponse]:
         """UUID 0402: Get remaining capacity information."""
         self._logger.debug("Fetching remaining capacity from %s", self._host)
         raw = await self._get_gatt("0402")
-        return RemainingCapacityResponse(
-            rem_capacity=raw.get("remCapacity"),
-            rem_capacity_pct=raw.get("remCapacityPct"),
-            rem_capacity_days=raw.get("remCapacityDays"),
-        )
+        return {int(k): RemainingCapacityResponse(
+            rem_capacity=v["remCapacity"],
+            rem_capacity_pct=v["remCapacityPct"],
+            rem_capacity_days=v["remCapacityDays"],
+            unit=v["unit"]) for k, v in raw.items()}
 
-    async def get_treated_water(self) -> TreatedWaterResponse:
+    async def get_treated_water(self) -> Mapping[int, TreatedWaterResponse]:
         """UUID 0503: Get treated water information."""
         self._logger.debug("Fetching treated water from %s", self._host)
         raw = await self._get_gatt("0503")
-        total_flow = raw["flow"]["1"]["totFlow"]
-        return TreatedWaterResponse(total_flow=total_flow)
+        return {int(k): TreatedWaterResponse(
+            total_flow=v["totFlow"],
+            total_ticks=v["totTicks"],
+            ) for k, v in raw["flow"].items()}
 
     async def get_substance_dosage(self) -> SubstanceDosageResponse:
         """UUID 0505: Get substance dosage information."""
