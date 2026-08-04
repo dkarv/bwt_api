@@ -33,6 +33,56 @@ class SmartDosStatus(enum.IntEnum):
     def _missing_(cls, value):
         return None
 
+    @classmethod
+    def normal(cls) -> list["SmartDosStatus"]:
+        """Return SmartDosStatus values considered normal/OK."""
+        return [
+            cls.STANDBY,
+            cls.METERING_ACTIVE,
+        ]
+
+    @classmethod
+    def warning(cls) -> list["SmartDosStatus"]:
+        """Return SmartDosStatus values that indicate warnings."""
+        return [
+            cls.MINERAL_CONTAINER_LEVEL_LOW,
+            cls.SMART_MINERAL_RUNNING_LOW,
+        ]
+
+    @classmethod
+    def error(cls) -> list["SmartDosStatus"]:
+        """Return SmartDosStatus values that indicate errors."""
+        return [
+            cls.MINERAL_CONTAINER_EMPTY,
+            cls.PUMP_FAULT,
+            cls.PUMP_POWER_FAULT,
+            cls.SMART_MINERAL_RUN_OUT,
+            cls.AQA_VOLUME_ALARM,
+            cls.AQA_WATCH_ALARM,
+            cls.AQA_MAXFLOW_ALARM,
+            cls.PUMP_CONTROL_FAULT,
+        ]
+
+    @classmethod
+    def category(cls, value) -> BwtStatus | None:
+        """Return the `BwtStatus` category for a SmartDosStatus value.
+
+        Accepts either an int or a SmartDosStatus member. Returns `BwtStatus.OK`,
+        `BwtStatus.WARNING`, or `BwtStatus.ERROR`, or `None` for unknown values.
+        """
+        try:
+            status = cls(value)
+        except Exception:
+            return None
+
+        if status in cls.normal():
+            return BwtStatus.OK
+        if status in cls.warning():
+            return BwtStatus.WARNING
+        if status in cls.error():
+            return BwtStatus.ERROR
+        return None
+
 
 class SubstanceType(enum.IntEnum):
     L1_LE = 1
@@ -68,7 +118,7 @@ class CurrentResponse:
     holiday_mode: int  # -1 or 0: inactive, 1: active, unix timestamp: start in future
     regeneration_last_1: datetime
     regeneration_last_2: datetime
-    service_customer: datetime 
+    service_customer: datetime
     service_technician: datetime
     out_of_service: int
     regeneration_count_1: int
@@ -81,7 +131,7 @@ class CurrentResponse:
     treated_day: int  # treated water current day
     treated_month: int  # treated water current month
     treated_year: int  # treated water current year
-    columns: int # number of columns: 2 for BWT Duo and 1 for BWT Perla One
+    columns: int  # number of columns: 2 for BWT Duo and 1 for BWT Perla One
 
 
 @dataclass
@@ -91,10 +141,12 @@ class DailyResponse:
     # [1] = 00:30 - 00:59
     values: list[int]
 
+
 @dataclass
 class MonthlyResponse:
     # treated water in 1 day intervals
     values: list[int]
+
 
 @dataclass
 class YearlyResponse:
@@ -136,6 +188,7 @@ class DeviceInfoResponse:
     device_variant: str  # Device variant
     total_flow: int  # Total treated water in ml
     total_dosed: int  # Total dosed substance in ml
+
 
 @dataclass
 class ConfigurationResponse:

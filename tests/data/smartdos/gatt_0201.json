@@ -1,0 +1,17 @@
+{
+    "fwRev": "1.2.0",
+    "hwRev": "2.4.0(A)",
+    "productCode": "3HZR-1R37",
+    "iotDevId": "5b29b9e9-24c5-4eea-a599-927922a89f5a",
+    "iotDevType": "bwt_bewados",
+    "iotDevVariant": "dev",
+    "uptime": 6510811,
+    "operatingTime": 40773211,
+    "devState": 2001,
+    "activeStates": [
+        2001
+    ],
+    "commDate": "2026-01-04T10:01:05.891Z",
+    "lifeTimeFlow_ml": 112507432,
+    "lifeTimeDosed_ml": 2746.1572265625
+}
