@@ -33,55 +33,21 @@ class SmartDosStatus(enum.IntEnum):
     def _missing_(cls, value):
         return None
 
-    @classmethod
-    def normal(cls) -> list["SmartDosStatus"]:
-        """Return SmartDosStatus values considered normal/OK."""
-        return [
-            cls.STANDBY,
-            cls.METERING_ACTIVE,
-        ]
+    def is_fatal(self) -> bool:
+        return self not in WARNING_CODES
 
-    @classmethod
-    def warning(cls) -> list["SmartDosStatus"]:
-        """Return SmartDosStatus values that indicate warnings."""
-        return [
-            cls.MINERAL_CONTAINER_LEVEL_LOW,
-            cls.SMART_MINERAL_RUNNING_LOW,
-        ]
+    def is_normal(self) -> bool:
+        return self in NORMAL_CODES
 
-    @classmethod
-    def error(cls) -> list["SmartDosStatus"]:
-        """Return SmartDosStatus values that indicate errors."""
-        return [
-            cls.MINERAL_CONTAINER_EMPTY,
-            cls.PUMP_FAULT,
-            cls.PUMP_POWER_FAULT,
-            cls.SMART_MINERAL_RUN_OUT,
-            cls.AQA_VOLUME_ALARM,
-            cls.AQA_WATCH_ALARM,
-            cls.AQA_MAXFLOW_ALARM,
-            cls.PUMP_CONTROL_FAULT,
-        ]
+NORMAL_CODES = [
+    SmartDosStatus.STANDBY,
+    SmartDosStatus.METERING_ACTIVE,
+]
 
-    @classmethod
-    def category(cls, value) -> BwtStatus | None:
-        """Return the `BwtStatus` category for a SmartDosStatus value.
-
-        Accepts either an int or a SmartDosStatus member. Returns `BwtStatus.OK`,
-        `BwtStatus.WARNING`, or `BwtStatus.ERROR`, or `None` for unknown values.
-        """
-        try:
-            status = cls(value)
-        except Exception:
-            return None
-
-        if status in cls.normal():
-            return BwtStatus.OK
-        if status in cls.warning():
-            return BwtStatus.WARNING
-        if status in cls.error():
-            return BwtStatus.ERROR
-        return None
+WARNING_CODES = [
+    SmartDosStatus.MINERAL_CONTAINER_LEVEL_LOW,
+    SmartDosStatus.SMART_MINERAL_RUNNING_LOW,
+]
 
 
 class SubstanceType(enum.IntEnum):
