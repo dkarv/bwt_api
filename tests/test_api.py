@@ -316,7 +316,7 @@ async def test_smartdos_get_wifi_info():
         )
         async with BwtSmartDosApi("host") as api:
             result = await api.get_wifi_info()
-            assert result.ssid == "Graf WLAN"
+            assert result.ssid == "MyWiFi"
             assert result.rssiAvg == "-54.00"
             assert result.mac == "AA:BB:CC:DD:EE:FF"
 
@@ -332,7 +332,7 @@ async def test_smartdos_get_gatt_0201():
         async with BwtSmartDosApi("host") as api:
             result = await api.get_gatt_0201()
             assert result["fwRev"] == "1.2.0"
-            assert result["productCode"] == "3HZR-1R37"
+            assert result["productCode"] == "1AAA-2BBB"
 
 
 async def test_smartdos_unknown_response():
