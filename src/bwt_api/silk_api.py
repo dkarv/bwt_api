@@ -25,10 +25,10 @@ class BwtSilkApi:
     async def close(self):
         await self._session.close()
 
-    async def get_registers(self) -> list[int]:
-        """Internal method to fetch json from the endpoint and handle general errors."""
+    async def __get_json(self, path: str):
+        """Fetch JSON from a Silk HTTP endpoint and handle general errors."""
         try:
-            async with self._session.get(f"http://{self._host}:80/silk/registers") as response:
+            async with self._session.get(f"http://{self._host}:80{path}") as response:
                 self._logger.debug(
                     "Response status: %s, content-type: %s",
                     response.status,
@@ -37,10 +37,19 @@ class BwtSilkApi:
                 if response.status == 200:
                     json = await response.json(content_type=None)
                     self._logger.debug("Raw response: %s", json)
-                    return json["params"]
+                    return json
                 else:
                     text = await response.text()
                     self._logger.warning("Unknown response with status %s: %s", response.status, text)
                     raise ApiException(f"Unknown response: {text}")
         except aiohttp.ClientConnectorError as e:
             raise ConnectException from e
+
+    async def get_registers(self) -> list[int]:
+        """Fetch softener register values from /silk/registers."""
+        json = await self.__get_json("/silk/registers")
+        return json["params"]
+
+    async def get_status(self) -> dict:
+        """Fetch firmware / product metadata from /silk/status."""
+        return await self.__get_json("/silk/status")

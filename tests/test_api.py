@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from aiohttp.client_reqrep import ClientResponse
 
-from bwt_api.api import BwtApi, BwtSmartDosApi, treated_to_blended
+from bwt_api.api import BwtApi, BwtSmartDosApi, BwtSilkApi, treated_to_blended
 from bwt_api.error import BwtError
 from bwt_api.data import CurrentResponse, Hardness, BwtStatus, SmartDosStatus, SubstanceType
 
@@ -451,3 +451,44 @@ def test_treated_to_blended():
     assert treated_to_blended(191, 21, 4) == pytest.approx(235.9411)
     # Edge case: hardness_in == 0 should return treated as-is, not divide by zero
     assert treated_to_blended(100, 0, 0) == 100
+
+
+async def test_silk_get_registers():
+    with aioresponses() as mocked:
+        mocked.get(
+            "http://host:80/silk/registers",
+            status=200,
+            body='{"params":[0, -1, 8, 30, 250]}',
+            headers={"Content-Type": "application/json"},
+        )
+        async with BwtSilkApi("host") as api:
+            result = await api.get_registers()
+            assert result == [0, -1, 8, 30, 250]
+
+
+async def test_silk_get_status():
+    with aioresponses() as mocked:
+        mocked.get(
+            "http://host:80/silk/status",
+            status=200,
+            body='{"version":"2.3.7","gitver":1234,"productCode":"SILK"}',
+            headers={"Content-Type": "application/json"},
+        )
+        async with BwtSilkApi("host") as api:
+            result = await api.get_status()
+            assert result["version"] == "2.3.7"
+            assert result["gitver"] == 1234
+            assert result["productCode"] == "SILK"
+
+
+async def test_silk_get_status_error():
+    with aioresponses() as mocked:
+        mocked.get(
+            "http://host:80/silk/status",
+            status=500,
+            body="boom",
+            headers={"Content-Type": "text/plain"},
+        )
+        async with BwtSilkApi("host") as api:
+            with pytest.raises(ApiException):
+                await api.get_status()
